@@ -31,10 +31,25 @@ export function detectHusky(projectRoot: string): boolean {
  * Returns the directory where hooks should be installed.
  * - Husky: `.husky/`
  * - Bare git: resolved from `git rev-parse --git-dir` or fallback to `.git/hooks/`
+ *
+ * Uses `git rev-parse --git-dir` to support worktrees, submodules, and GIT_DIR overrides.
  */
 export function resolveHookDir(projectRoot: string, isHusky: boolean): string {
   if (isHusky) {
     return join(projectRoot, ".husky");
   }
+  try {
+    const result = Bun.spawnSync(
+      ["git", "rev-parse", "--git-dir"],
+      { cwd: projectRoot, stdout: "pipe", stderr: "pipe" }
+    );
+    if (result.exitCode === 0) {
+      // git-dir is relative to project root, resolve to absolute
+      return join(projectRoot, result.stdout.toString().trim(), "hooks");
+    }
+  } catch {
+    // git not available
+  }
+  // Fallback to default .git/hooks/
   return join(projectRoot, ".git", "hooks");
 }

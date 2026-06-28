@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from "bun:test";
-import { mkdirSync, writeFileSync, readFileSync, rmSync, existsSync, chmodSync } from "node:fs";
+import { mkdirSync, writeFileSync, readFileSync, rmSync, existsSync } from "node:fs";
 import { join } from "node:path";
 import { installHook } from "../../src/hooks/install";
 import { uninstallHook } from "../../src/hooks/uninstall";
@@ -8,8 +8,9 @@ const TMP = join(import.meta.dir, "__tmp_hooks");
 
 beforeEach(() => {
   rmSync(TMP, { recursive: true, force: true });
-  // Create minimal .git/hooks structure
-  mkdirSync(join(TMP, ".git", "hooks"), { recursive: true });
+  mkdirSync(TMP, { recursive: true });
+  // Init a real git repo so resolveHookDir can find .git via rev-parse
+  Bun.spawnSync(["git", "init"], { cwd: TMP, stdout: "pipe", stderr: "pipe" });
 });
 
 afterEach(() => {

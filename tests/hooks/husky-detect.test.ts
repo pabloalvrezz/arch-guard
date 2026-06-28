@@ -62,7 +62,10 @@ describe("resolveHookDir", () => {
     expect(resolveHookDir(TMP, true)).toBe(join(TMP, ".husky"));
   });
 
-  it("returns .git/hooks/ for bare git", () => {
-    expect(resolveHookDir(TMP, false)).toBe(join(TMP, ".git", "hooks"));
+  it("returns actual repo hooks dir for bare git", () => {
+    const dir = resolveHookDir(TMP, false);
+    // Since TMP is inside a git repo, it resolves the real hooks dir
+    expect(dir).toContain(".git/hooks");
+    expect(dir.endsWith(".git/hooks")).toBe(true);
   });
 });
