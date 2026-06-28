@@ -8,6 +8,9 @@ import type { DiscoveredConfig } from "./types";
  */
 const CONFIG_NAMES = [".archguard.yml", ".archguard.yaml", ".archguard.toml"] as const;
 
+/** Cache git root result to avoid repeated subprocess calls. null = not cached yet. */
+let _gitRootCache: string | null | undefined = undefined;
+
 /**
  * Format extension → format type mapping.
  */
@@ -20,19 +23,23 @@ const EXTENSION_MAP: Record<string, DiscoveredConfig["format"]> = {
 /**
  * Find the git root directory by walking upward and running `git rev-parse --show-toplevel`.
  * Returns null if not inside a git repo.
+ * Results are cached globally — git root doesn't change during a scan.
  */
 export function findGitRoot(startDir: string): string | null {
+  if (_gitRootCache !== undefined) return _gitRootCache;
   try {
     const result = Bun.spawnSync(
       ["git", "rev-parse", "--show-toplevel"],
       { cwd: startDir, stdout: "pipe", stderr: "pipe" }
     );
     if (result.exitCode === 0) {
-      return result.stdout.toString().trim();
+      _gitRootCache = result.stdout.toString().trim();
+      return _gitRootCache;
     }
   } catch {
     // git not available or not in a repo
   }
+  _gitRootCache = null;
   return null;
 }
 

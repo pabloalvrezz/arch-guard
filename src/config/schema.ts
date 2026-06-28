@@ -7,8 +7,8 @@ import type {
 } from "./types";
 
 /**
- * JSON Schema definition for ConfigDocument (version 1).
- * Used for structural validation of parsed config files.
+ * Manual structural validation for ConfigDocument (version 1).
+ * Validates parsed config fields against expected types and values.
  */
 const CONFIG_SCHEMA_VERSION = 1;
 

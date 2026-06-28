@@ -58,7 +58,7 @@ describe("loadConfig", () => {
     expect(doc.preset).toBe("hex");
   });
 
-  it("throws ConfigError on schema validation failure with file:line", () => {
+  it("throws ConfigError on schema validation failure with field path", () => {
     const configPath = path.join(tmpDir, ".archguard.yml");
     fs.writeFileSync(configPath, "version: 1\nlayers:\n  invalid:\n    bad:\n");
 
