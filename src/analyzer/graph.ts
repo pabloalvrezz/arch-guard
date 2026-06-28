@@ -22,8 +22,8 @@ export interface GraphNode {
   imports: string[];
   /** Resolved absolute paths of imports (null = unresolvable) */
   resolvedImports: (string | null)[];
-  /** Line numbers of imports */
-  importLines: number[];
+  /** Line and column of each import (1-indexed line, 1-indexed column) */
+  importLocations: Array<{ line: number; column: number }>;
 }
 
 /**
@@ -79,11 +79,11 @@ export function buildLayerGraph(
       const imports = extractImports(sourceFile);
       const resolvedImports: (string | null)[] = [];
       const importSpecifiers: string[] = [];
-      const importLines: number[] = [];
+      const importLocations: Array<{ line: number; column: number }> = [];
 
       for (const imp of imports) {
         importSpecifiers.push(imp.specifier);
-        importLines.push(imp.line);
+        importLocations.push({ line: imp.line, column: imp.column });
         resolvedImports.push(resolveSpecifier(imp.specifier, filePath, aliases, rootDir));
       }
 
@@ -92,7 +92,7 @@ export function buildLayerGraph(
         layer,
         imports: importSpecifiers,
         resolvedImports,
-        importLines,
+        importLocations,
       });
 
       // Build edges between layers

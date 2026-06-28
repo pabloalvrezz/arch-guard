@@ -14,7 +14,7 @@ export interface ImportRecord {
   isReExport: boolean;
   /** Line number (1-indexed) */
   line: number;
-  /** Column number (0-indexed) */
+  /** Column number (1-indexed) */
   column: number;
 }
 
