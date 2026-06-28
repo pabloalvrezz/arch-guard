@@ -37,7 +37,7 @@ program
   .command("check")
   .description("Scan source files for architecture violations")
   .argument("<path>", "directory or file to scan")
-  .option("--format <mode>", "output format: human | json (default: auto-detect TTY)", "auto")
+  .option("--format <mode>", "output format: human | json (default: auto-detect TTY)")
   .option("--config <path>", "path to config file (default: auto-discover)")
   .option("--quiet", "suppress per-violation lines; summary only on stderr")
   .option("--staged", "scan only git-staged files (for pre-commit hooks)")
@@ -205,6 +205,7 @@ type OutputFormat = "human" | "json";
 function resolveFormat(raw: string | undefined): OutputFormat {
   if (raw === "json") return "json";
   if (raw === "human") return "human";
+  // "auto" or undefined → detect TTY
   return process.stdout.isTTY ? "human" : "json";
 }
 
