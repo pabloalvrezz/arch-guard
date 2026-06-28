@@ -20,6 +20,15 @@ export const hexLayerDirection: Rule = {
     // Build the deny set from config edges
     const denyEdges = new Set(config.edges.deny ?? []);
 
+    // Pre-build layer lookup map for O(1) import→layer resolution
+    const layerByPath = new Map<string, string | null>();
+    for (const node of graph.nodes) {
+      // Only cache nodes that have been resolved (have a file path)
+      if (node.filePath) {
+        layerByPath.set(node.filePath, node.layer);
+      }
+    }
+
     // Check each node's imports for layer-direction violations
     for (const node of graph.nodes) {
       if (node.layer === null) continue;
@@ -29,8 +38,8 @@ export const hexLayerDirection: Rule = {
         const resolved = node.resolvedImports[i];
         if (resolved === null) continue;
 
-        // Find the layer of the imported file
-        const importedLayer = findLayerOfImport(resolved, graph);
+        // Find the layer of the imported file (O(1) via pre-built map)
+        const importedLayer = layerByPath.get(resolved) ?? null;
         if (importedLayer === null) continue;
 
         // Skip same-layer imports
@@ -39,12 +48,13 @@ export const hexLayerDirection: Rule = {
         // Check if this edge is in the deny list
         const edgeKey = `${node.layer}→${importedLayer}`;
         if (denyEdges.has(edgeKey)) {
+          const loc = node.importLocations[i];
           violations.push({
             rule: "hex/layer-direction",
             severity: "error", // Will be overridden by engine
             file: node.filePath,
-            line: node.importLines[i],
-            column: 1, // Column not tracked at graph level
+            line: loc.line,
+            column: loc.column,
             reason: `Forbidden dependency: ${node.layer} → ${importedLayer} (denied by ${edgeKey})`,
           });
         }

@@ -24,7 +24,7 @@ function makeNode(overrides: Partial<GraphNode> & { filePath: string }): GraphNo
     layer: null,
     imports: [],
     resolvedImports: [],
-    importLines: [],
+    importLocations: [],
     ...overrides,
   };
 }
@@ -38,7 +38,7 @@ describe("hex/layer-direction", () => {
           layer: "domain",
           imports: ['from "../infra/db"'],
           resolvedImports: ["/src/infra/db.ts"],
-          importLines: [1],
+          importLocations: [{ line: 1, column: 0 }],
         }),
         makeNode({
           filePath: "/src/infra/db.ts",
@@ -58,6 +58,7 @@ describe("hex/layer-direction", () => {
     expect(violations[0].rule).toBe("hex/layer-direction");
     expect(violations[0].file).toBe("/src/domain/order.ts");
     expect(violations[0].line).toBe(1);
+    expect(violations[0].column).toBe(0);
     expect(violations[0].reason).toContain("domain → infrastructure");
   });
 
@@ -69,7 +70,7 @@ describe("hex/layer-direction", () => {
           layer: "domain",
           imports: ['from "../interface-adapters/http"'],
           resolvedImports: ["/src/interface-adapters/http.ts"],
-          importLines: [1],
+          importLocations: [{ line: 1, column: 0 }],
         }),
         makeNode({
           filePath: "/src/interface-adapters/http.ts",
@@ -97,7 +98,7 @@ describe("hex/layer-direction", () => {
           layer: "application",
           imports: ['from "../infrastructure/db"'],
           resolvedImports: ["/src/infrastructure/db.ts"],
-          importLines: [1],
+          importLocations: [{ line: 1, column: 0 }],
         }),
         makeNode({
           filePath: "/src/infrastructure/db.ts",
@@ -125,7 +126,7 @@ describe("hex/layer-direction", () => {
           layer: "domain",
           imports: ['from "../application/usecase"'],
           resolvedImports: ["/src/application/usecase.ts"],
-          importLines: [1],
+          importLocations: [{ line: 1, column: 0 }],
         }),
         makeNode({
           filePath: "/src/application/usecase.ts",
@@ -152,7 +153,7 @@ describe("hex/layer-direction", () => {
           layer: "domain",
           imports: ['from "./user"'],
           resolvedImports: ["/src/domain/user.ts"],
-          importLines: [1],
+          importLocations: [{ line: 1, column: 0 }],
         }),
         makeNode({
           filePath: "/src/domain/user.ts",
@@ -179,7 +180,7 @@ describe("hex/layer-direction", () => {
           layer: null,
           imports: ['from "./domain/order"'],
           resolvedImports: ["/src/domain/order.ts"],
-          importLines: [1],
+          importLocations: [{ line: 1, column: 0 }],
         }),
       ],
       layers: ["domain"],
@@ -202,7 +203,7 @@ describe("hex/layer-direction", () => {
           layer: "domain",
           imports: ['from "./unknown"'],
           resolvedImports: [null],
-          importLines: [1],
+          importLocations: [{ line: 1, column: 0 }],
         }),
       ],
       layers: ["domain"],
@@ -231,7 +232,7 @@ describe("hex/layer-direction", () => {
             "/src/infrastructure/db.ts",
             "/src/interface-adapters/http.ts",
           ],
-          importLines: [1, 2],
+          importLocations: [{ line: 1, column: 0 }, { line: 2, column: 0 }],
         }),
         makeNode({
           filePath: "/src/infrastructure/db.ts",
@@ -270,7 +271,7 @@ describe("hex/layer-direction", () => {
           layer: "domain",
           imports: ['from "../infrastructure/db"'],
           resolvedImports: ["/src/infrastructure/db.ts"],
-          importLines: [1],
+          importLocations: [{ line: 1, column: 0 }],
         }),
         makeNode({
           filePath: "/src/infrastructure/db.ts",
