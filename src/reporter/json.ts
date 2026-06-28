@@ -5,13 +5,16 @@ import type { JSONReport, ReportSummary } from "./types";
  * REQ-RPT-004: JSON output matches stable schema:
  * `{ version, summary, violations }` with `version: "0.1.0"`.
  *
+ * REQ-RPT-006: quiet mode suppresses per-violation entries;
+ * only summary is included.
+ *
  * Output is deterministic (violations must be pre-sorted by caller).
  */
-export function renderJSON(violations: Violation[]): JSONReport {
+export function renderJSON(violations: Violation[], quiet?: boolean): JSONReport {
   return {
     version: "0.1.0",
     summary: buildSummary(violations),
-    violations,
+    violations: quiet ? [] : violations,
   };
 }
 
