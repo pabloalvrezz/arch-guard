@@ -1,3 +1,4 @@
+import * as path from "node:path";
 import pc from "picocolors";
 import type { Severity } from "../rules/types";
 import type { HumanReport, ReporterOptions } from "./types";
@@ -12,26 +13,52 @@ import type { HumanReport, ReporterOptions } from "./types";
  */
 export function renderHuman(report: HumanReport, opts: ReporterOptions): string {
   const lines: string[] = [];
+  const root = opts.projectRoot ? path.resolve(opts.projectRoot) : undefined;
+
+  function relPath(fullPath: string): string {
+    if (!root) return fullPath;
+    const r = path.relative(root, fullPath);
+    return r.startsWith(".") ? r : `./${r}`;
+  }
 
   // Per-violation lines (unless quiet)
   if (!opts.quiet) {
+    // Group violations by file for cleaner output
+    const byFile = new Map<string, typeof report.violations>();
     for (const v of report.violations) {
-      const location = `${v.file}:${v.line}:${v.column}`;
-      const rule = v.rule;
-      const reason = v.reason;
+      const file = relPath(v.file);
+      const existing = byFile.get(file);
+      if (existing) existing.push(v);
+      else byFile.set(file, [v]);
+    }
 
-      if (opts.isTTY) {
-        const colored = severityColor(v.severity);
-        lines.push(`${location} - ${rule} - ${colored(reason)}`);
-      } else {
-        lines.push(`${location} - ${rule} - ${reason}`);
+    for (const [file, violations] of byFile) {
+      if (opts.isTTY) lines.push(pc.bold(pc.underline(file)));
+      else lines.push(file);
+
+      for (const v of violations) {
+        const prefix = `  ${v.line}:${v.column}`;
+        const reason = v.reason;
+
+        if (opts.isTTY) {
+          const colored = severityColor(v.severity);
+          lines.push(`  ${pc.dim(`${v.line}:${v.column}`)}  ${pc.dim(v.rule)}  ${colored(reason)}`);
+        } else {
+          lines.push(`  ${v.line}:${v.column}  ${v.rule}  ${reason}`);
+        }
       }
+      lines.push(""); // blank line between file groups
     }
 
-    // Blank line before summary when there are violations
-    if (report.violations.length > 0) {
-      lines.push("");
+    // Remove trailing blank line if we added one
+    if (byFile.size > 0) {
+      lines.pop();
     }
+  }
+
+  // Blank line before summary when there are violations
+  if (report.violations.length > 0) {
+    lines.push("");
   }
 
   // Summary block

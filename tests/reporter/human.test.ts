@@ -41,7 +41,7 @@ describe("renderHuman", () => {
     expect(output).toContain("0 violations");
   });
 
-  it("renders violation line in file:line:column - rule - reason format", () => {
+  it("renders violation grouped by file", () => {
     const v: Violation = {
       rule: "hex/layer-direction",
       severity: "error",
@@ -51,17 +51,26 @@ describe("renderHuman", () => {
       reason: "domain imports infra",
     };
     const output = renderHuman(makeReport([v]), pipeOpts);
-    expect(output).toContain("/src/domain/order.ts:3:1 - hex/layer-direction - domain imports infra");
+    // File header
+    expect(output).toContain("/src/domain/order.ts");
+    // Violation line (indented)
+    expect(output).toContain("3:1");
+    expect(output).toContain("hex/layer-direction");
+    expect(output).toContain("domain imports infra");
   });
 
-  it("renders multiple violations (piped, no color codes)", () => {
+  it("renders multiple violations grouped by file (piped, no color codes)", () => {
     const violations: Violation[] = [
       { rule: "hex/layer-direction", severity: "error", file: "/a.ts", line: 1, column: 1, reason: "bad" },
       { rule: "clean/dependency-rule", severity: "warn", file: "/b.ts", line: 5, column: 2, reason: "also bad" },
     ];
     const output = renderHuman(makeReport(violations), pipeOpts);
-    expect(output).toContain("/a.ts:1:1 - hex/layer-direction - bad");
-    expect(output).toContain("/b.ts:5:2 - clean/dependency-rule - also bad");
+    expect(output).toContain("/a.ts");
+    expect(output).toContain("1:1");
+    expect(output).toContain("hex/layer-direction");
+    expect(output).toContain("/b.ts");
+    expect(output).toContain("5:2");
+    expect(output).toContain("clean/dependency-rule");
   });
 
   it("includes per-severity counts in summary", () => {
@@ -96,7 +105,8 @@ describe("renderHuman", () => {
       reason: "bad",
     };
     const output = renderHuman(makeReport([v]), quietOpts);
-    expect(output).not.toContain("/a.ts:1:1");
+    expect(output).not.toContain("/a.ts");
+    expect(output).not.toContain("1:1");
     expect(output).toContain("1 violation");
   });
 

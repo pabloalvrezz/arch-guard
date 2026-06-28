@@ -44,4 +44,6 @@ export interface ReporterOptions {
   isTTY: boolean;
   /** REQ-RPT-006: suppress per-violation lines, only summary on stderr */
   quiet: boolean;
+  /** Project root path — violations paths are shown relative to this */
+  projectRoot?: string;
 }
