@@ -7,7 +7,7 @@ import {
   parseTsConfigPaths,
   type PathAlias,
 } from "./resolve";
-import { getCompilerPaths, type initProject } from "./project";
+import { getCompilerPaths } from "./project";
 import picomatch from "picomatch";
 
 /**

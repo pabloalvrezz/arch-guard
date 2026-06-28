@@ -77,13 +77,14 @@ function resolveAlias(specifier: string, alias: PathAlias): string | null {
   // Convert alias pattern to a regex
   // "@/*" matches "@/" at the start, captures the rest
   const aliasBase = alias.alias.replace(/\*$/, "");
-  if (specifier.startsWith(aliasBase)) {
-    const rest = specifier.slice(aliasBase.length);
-    // Try each path mapping
-    for (const mapping of alias.paths) {
-      const mappingBase = mapping.replace(/\*$/, "");
-      return mappingBase + rest;
-    }
+  if (!specifier.startsWith(aliasBase)) return null;
+  const rest = specifier.slice(aliasBase.length);
+
+  // Try each path mapping. TypeScript resolves the first that exists,
+  // so we return the first match (caller checks file existence).
+  for (const mapping of alias.paths) {
+    const mappingBase = mapping.replace(/\*$/, "");
+    return mappingBase + rest;
   }
   return null;
 }
@@ -152,7 +153,7 @@ export function parseTsConfigPaths(
 
 /**
  * Resolve a batch of import records from a single source file.
- * Returns the resolved absolute paths (filtering out nulls).
+ * Returns mapping of imports to resolved paths (null if unresolvable).
  */
 export function resolveImports(
   imports: ImportRecord[],

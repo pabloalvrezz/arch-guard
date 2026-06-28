@@ -115,7 +115,7 @@ describe("resolveImports", () => {
     );
   });
 
-  it("filters out nulls for unresolvable imports", () => {
+  it("returns null for unresolvable imports", () => {
     const fromFile = path.join(FIXTURES_DIR, "hex-good", "src", "app.ts");
     const imports: ImportRecord[] = [
       { specifier: "react", isTypeOnly: false, isDynamic: false, isReExport: false, line: 1, column: 0 },
