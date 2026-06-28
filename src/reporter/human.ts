@@ -34,7 +34,8 @@ export function renderHuman(report: HumanReport, opts: ReporterOptions): string 
       const file = relPath(v.file);
       const location = `${file}:${v.line}:${v.column}`;
       const reason = cleanReason(v.reason);
-      const indent = "         "; // aligns with severity label
+      // Indent aligns with severity label (2 spaces + severity + 2 spaces)
+      const indent = " ".repeat(sevLabel.length + 2);
 
       if (opts.isTTY) {
         const sevColor = severityColor(v.severity);
