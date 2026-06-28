@@ -293,7 +293,7 @@ function outputResult(
   projectRoot?: string
 ) {
   if (format === "json") {
-    const report = renderJSON(violations);
+    const report = renderJSON(violations, quiet);
     process.stdout.write(JSON.stringify(report, null, 2) + "\n");
   } else {
     const summary = buildSummary(violations);
