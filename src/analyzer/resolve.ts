@@ -32,9 +32,9 @@ export function resolveSpecifier(
 ): string | null {
   // 1. Try to resolve via tsconfig.paths aliases (resolve relative to rootDir)
   for (const alias of aliases) {
-    const resolved = resolveAlias(specifier, alias);
-    if (resolved !== null) {
-      const absolutePath = path.resolve(rootDir ?? path.dirname(fromFile), resolved);
+    const candidates = resolveAliasPaths(specifier, alias);
+    for (const candidate of candidates) {
+      const absolutePath = path.resolve(rootDir ?? path.dirname(fromFile), candidate);
       // Try exact path first, then with extensions
       if (fileExists(absolutePath)) {
         return absolutePath;
@@ -71,22 +71,18 @@ export function resolveSpecifier(
 
 /**
  * Resolve a specifier against a single path alias.
- * Returns the resolved path prefix, or null if no match.
+ * Returns ALL candidate paths (one per mapping), in order.
+ * Caller tries each until one resolves as an actual file.
  */
-function resolveAlias(specifier: string, alias: PathAlias): string | null {
-  // Convert alias pattern to a regex
-  // "@/*" matches "@/" at the start, captures the rest
+function resolveAliasPaths(specifier: string, alias: PathAlias): string[] {
   const aliasBase = alias.alias.replace(/\*$/, "");
-  if (!specifier.startsWith(aliasBase)) return null;
+  if (!specifier.startsWith(aliasBase)) return [];
   const rest = specifier.slice(aliasBase.length);
 
-  // Try each path mapping. TypeScript resolves the first that exists,
-  // so we return the first match (caller checks file existence).
-  for (const mapping of alias.paths) {
+  return alias.paths.map((mapping) => {
     const mappingBase = mapping.replace(/\*$/, "");
     return mappingBase + rest;
-  }
-  return null;
+  });
 }
 
 /**

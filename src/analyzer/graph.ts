@@ -1,5 +1,5 @@
 import * as path from "node:path";
-import type { SourceFile } from "ts-morph";
+import type { SourceFile, Project } from "ts-morph";
 import type { ResolvedConfig, LayerDef } from "../config/types";
 import { extractImports } from "./imports";
 import {
@@ -52,9 +52,7 @@ export interface LayerGraph {
 export function buildLayerGraph(
   sourceFiles: SourceFile[],
   config: ResolvedConfig,
-  project?: ReturnType<typeof import("./project").initProject> extends infer T
-    ? T
-    : never
+  project?: Project | null
 ): LayerGraph {
   // Parse path aliases from tsconfig
   let aliases: PathAlias[] = [];
@@ -86,20 +84,7 @@ export function buildLayerGraph(
       for (const imp of imports) {
         importSpecifiers.push(imp.specifier);
         importLines.push(imp.line);
-
-        if (imp.isDynamic && imp.specifier) {
-          // Dynamic import — resolve directly
-          const resolved = resolveSpecifier(imp.specifier, filePath, aliases, rootDir);
-          resolvedImports.push(resolved);
-        } else if (imp.isReExport) {
-          // Re-export — resolve for attribution
-          const resolved = resolveSpecifier(imp.specifier, filePath, aliases, rootDir);
-          resolvedImports.push(resolved);
-        } else {
-          // Static import
-          const resolved = resolveSpecifier(imp.specifier, filePath, aliases, rootDir);
-          resolvedImports.push(resolved);
-        }
+        resolvedImports.push(resolveSpecifier(imp.specifier, filePath, aliases, rootDir));
       }
 
       nodes.push({
@@ -149,6 +134,25 @@ export function buildLayerGraph(
 }
 
 /**
+ * Pre-compiled picomatch matchers per layer name.
+ * Built once to avoid per-file × per-layer regex compilation.
+ */
+const layerMatcherCache = new Map<string, ReturnType<typeof picomatch>>();
+
+function clearLayerMatcherCache(): void {
+  layerMatcherCache.clear();
+}
+
+function getLayerMatcher(pattern: string): ReturnType<typeof picomatch> {
+  let matcher = layerMatcherCache.get(pattern);
+  if (!matcher) {
+    matcher = picomatch(pattern.replace(/\\/g, "/"));
+    layerMatcherCache.set(pattern, matcher);
+  }
+  return matcher;
+}
+
+/**
  * Match a file path against layer glob patterns.
  * Returns the first matching layer name, or null if no match.
  */
@@ -160,8 +164,7 @@ function matchLayer(
   const normalizedPath = filePath.replace(/\\/g, "/");
 
   for (const [name, def] of Object.entries(layers)) {
-    const globPattern = def.path.replace(/\\/g, "/");
-    const isMatch = picomatch(globPattern);
+    const isMatch = getLayerMatcher(def.path);
     if (isMatch(normalizedPath)) {
       return name;
     }
