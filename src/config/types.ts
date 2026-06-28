@@ -1,9 +1,3 @@
-import type { Severity } from "../shared/exit";
-
-/**
- * Severity type re-export for config convenience.
- * Rules use 'error' | 'warn' directly.
- */
 export type RuleSeverity = "error" | "warn";
 
 /**

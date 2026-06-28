@@ -50,8 +50,11 @@ export function resolveForFile(
   let perFileDoc: ConfigDocument;
   try {
     perFileDoc = loadConfig(perFile);
-  } catch {
-    // If per-file config fails to load, fall back to global
+  } catch (err) {
+    // Per-file config failed — warn and fall back to global
+    console.warn(
+      `[arch-guard] warning: per-file config at ${perFile.path} failed to load, falling back to global config: ${err instanceof Error ? err.message : String(err)}`
+    );
     return {
       filePath,
       layers: globalConfig.layers,
