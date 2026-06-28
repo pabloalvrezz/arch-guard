@@ -1,4 +1,5 @@
 import type { Rule, RuleContext, Violation } from "../types";
+import { matchGlob } from "./match";
 
 /**
  * Shared no-cross-glob rule.
@@ -81,18 +82,4 @@ export const sharedNoCrossGlob: Rule = {
   },
 };
 
-/**
- * Minimal glob matching for cross-glob patterns.
- * Supports: *, **, and literal characters.
- * Strips leading slash from paths to match glob patterns like "src/**".
- */
-function matchGlob(pattern: string, value: string): boolean {
-  const normalized = value.replace(/^\/+/, "");
-  const regexStr = pattern
-    .replace(/\./g, "\\.")
-    .replace(/\*\*/g, "{{GLOBSTAR}}")
-    .replace(/\*/g, "[^/]*")
-    .replace(/\{\{GLOBSTAR\}\}/g, ".*");
-  const regex = new RegExp(`^${regexStr}$`);
-  return regex.test(normalized);
-}
+

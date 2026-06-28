@@ -97,14 +97,17 @@ export const sharedNoCircular: Rule = {
       const node = nodeByPath.get(nodePath)!;
       // Find the cycle this node participates in for the reason message
       const cycle = cyclePaths.find((c) => c.includes(nodePath));
-      const cycleStr = cycle ? cycle.join(" → ") + " → " + cycle[0] : nodePath;
+      // cycle already includes the closing node (e.g., a→b→a)
+      const cycleStr = cycle ? cycle.join(" → ") : nodePath;
+      // Use the first import line as a best-effort location
+      const firstImport = node.importLocations?.[0];
 
       violations.push({
         rule: "shared/no-circular",
         severity: "error",
         file: node.filePath,
-        line: 1,
-        column: 1,
+        line: firstImport?.line ?? 1,
+        column: firstImport?.column ?? 1,
         reason: `Circular dependency detected: ${cycleStr}`,
       });
     }

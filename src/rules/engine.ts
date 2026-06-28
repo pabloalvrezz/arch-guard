@@ -1,6 +1,7 @@
 import type { LayerGraph } from "../analyzer/graph";
 import type { ResolvedConfig } from "../config/types";
 import type { Rule, RuleContext, Violation } from "./types";
+import { matchGlob } from "./shared/match";
 
 /**
  * Rule engine — registers rules, runs all against the graph, collects violations.
@@ -70,21 +71,6 @@ function matchesIgnore(filePath: string, globs: string[]): boolean {
     const pattern = glob.replace(/\\/g, "/");
     return matchGlob(pattern, normalized);
   });
-}
-
-/**
- * Minimal glob matching for ignore patterns.
- * Supports: *, **, and literal characters.
- */
-function matchGlob(pattern: string, value: string): boolean {
-  // Convert glob to regex
-  const regexStr = pattern
-    .replace(/\./g, "\\.")
-    .replace(/\*\*/g, "{{GLOBSTAR}}")
-    .replace(/\*/g, "[^/]*")
-    .replace(/\{\{GLOBSTAR\}\}/g, ".*");
-  const regex = new RegExp(`^${regexStr}$`);
-  return regex.test(value);
 }
 
 /**
