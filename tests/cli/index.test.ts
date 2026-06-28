@@ -1,5 +1,4 @@
 import { describe, it, expect } from "bun:test";
-import { execSync } from "child_process";
 
 const CLI = "./src/cli/index.ts";
 

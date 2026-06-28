@@ -26,4 +26,16 @@ if (!result.success) {
   process.exit(1);
 }
 
+// Rename index.js → cli.js for package.json bin entry
+const { cpSync, rmSync } = await import("node:fs");
+for (const output of result.outputs) {
+  const src = output.path;
+  const dest = src.replace("/index.js", "/cli.js");
+  if (src !== dest) {
+    cpSync(src, dest);
+    rmSync(src);
+    console.log(`  → ${dest}`);
+  }
+}
+
 console.log(`Build successful → ${result.outputs.length} file(s)`);
