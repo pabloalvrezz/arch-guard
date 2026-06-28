@@ -12,9 +12,11 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@iarna/toml": "^2.2.5",
     "commander": "^13.1.0",
     "picocolors": "^1.1.1",
-    "picomatch": "^4.0.2"
+    "picomatch": "^4.0.2",
+    "yaml": "^2.9.0"
   },
   "devDependencies": {
     "@types/picomatch": "^4.0.1",
