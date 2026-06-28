@@ -1,7 +1,21 @@
 node_modules/
 dist/
+*.log
+.DS_Store
+
+# arch-guard config files (project-specific, not source)
 .archguard.yml
 .archguard.yaml
 .archguard.toml
-*.log
-.DS_Store
+
+# Editor/IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+Thumbs.db
+
+# Test coverage
+coverage/
