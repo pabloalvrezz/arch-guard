@@ -196,6 +196,57 @@ Options:
 | 1 | Violations found |
 | 2 | Fatal error (config parse, invalid arguments) |
 
+### Output
+
+Human-friendly format showing violations grouped by severity, with relative paths and clear location info:
+
+```text
+  error  hex/layer-direction
+           ./src/domain/order.ts:42:5
+           Forbidden dependency: domain → infrastructure (denied by domain→infrastructure)
+
+  error  shared/no-circular
+           ./src/app/core/models/Client.ts:1:1
+           Circular dependency detected: ./app/core/models/Client.ts → ./app/core/models/Project.ts → ./app/core/models/Client.ts
+
+  warn  shared/no-cross-glob
+          ./src/legacy/old-module.ts:15:3
+          Cross-glob import: file in glob[0] imports from glob[1]
+
+2 violations (1 error, 1 warn) [hex/layer-direction: 1, shared/no-circular: 1]
+```
+
+JSON output for CI / tooling pipelines:
+
+```json
+{
+  "version": "0.1.0",
+  "summary": {
+    "total": 2,
+    "bySeverity": { "error": 1, "warn": 1 },
+    "byRule": { "hex/layer-direction": 1, "shared/no-circular": 1 },
+    "worstSeverity": "error"
+  },
+  "violations": [
+    {
+      "rule": "hex/layer-direction",
+      "severity": "error",
+      "file": "/project/src/domain/order.ts",
+      "line": 42,
+      "column": 5,
+      "reason": "Forbidden dependency: domain → infrastructure"
+    }
+  ]
+}
+```
+
+Use `--quiet` to suppress per-violation lines — only the summary line is shown:
+
+```bash
+arch-guard check ./src --quiet
+# → 5 violations (5 errors)
+```
+
 ## Examples
 
 ### Scan a project with zero config

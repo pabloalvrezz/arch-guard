@@ -56,7 +56,7 @@ program
       if (staged) {
         sourceFilePaths = getStagedFiles();
         if (sourceFilePaths.length === 0) {
-          outputResult([], format, isTTY, quiet);
+          outputResult([], format, isTTY, quiet, path.resolve(targetPath));
           return;
         }
       } else {
@@ -64,7 +64,7 @@ program
       }
 
       if (sourceFilePaths.length === 0) {
-        outputResult([], format, isTTY, quiet);
+        outputResult([], format, isTTY, quiet, path.resolve(targetPath));
         return;
       }
 
@@ -99,7 +99,7 @@ program
 
       // 7. Output
       const sorted = sortViolations(violations);
-      outputResult(sorted, format, isTTY, quiet);
+      outputResult(sorted, format, isTTY, quiet, path.resolve(targetPath));
     } catch (err) {
       if (err instanceof ArchGuardError) {
         process.stderr.write(`error: ${err.message}\n`);
@@ -289,14 +289,18 @@ function outputResult(
   violations: Violation[],
   format: OutputFormat,
   isTTY: boolean,
-  quiet: boolean
+  quiet: boolean,
+  projectRoot?: string
 ) {
   if (format === "json") {
     const report = renderJSON(violations);
     process.stdout.write(JSON.stringify(report, null, 2) + "\n");
   } else {
     const summary = buildSummary(violations);
-    const output = renderHuman({ violations, summary }, { isTTY, quiet });
+    const output = renderHuman(
+      { violations, summary },
+      { isTTY, quiet, projectRoot }
+    );
     process.stdout.write(output + "\n");
   }
 
