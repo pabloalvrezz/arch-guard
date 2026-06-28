@@ -7,7 +7,7 @@ import type { HumanReport, ReporterOptions } from "./types";
  * REQ-RPT-001: Human output is TTY-aware — colors via picocolors on TTY,
  * plain text when stdout is piped.
  *
- * REQ-RPT-002: Each violation renders as `file:line:column - rule - reason`.
+ * REQ-RPT-002: Each violation renders as a structured list entry.
  * REQ-RPT-003: Summary shows total + per-severity + per-rule counts.
  * REQ-RPT-006: --quiet suppresses per-violation lines.
  */
@@ -21,37 +21,36 @@ export function renderHuman(report: HumanReport, opts: ReporterOptions): string 
     return r.startsWith(".") ? r : `./${r}`;
   }
 
-  // Per-violation lines (unless quiet)
+  // Also replace absolute paths in reason strings (e.g. cycle paths in no-circular)
+  function cleanReason(reason: string): string {
+    if (!root) return reason;
+    return reason.replaceAll(root, ".");
+  }
+
+  // Per-violation list entries (unless quiet)
   if (!opts.quiet) {
-    // Group violations by file for cleaner output
-    const byFile = new Map<string, typeof report.violations>();
     for (const v of report.violations) {
+      const sevLabel = v.severity === "error" ? "error" : "warn";
       const file = relPath(v.file);
-      const existing = byFile.get(file);
-      if (existing) existing.push(v);
-      else byFile.set(file, [v]);
-    }
+      const location = `${file}:${v.line}:${v.column}`;
+      const reason = cleanReason(v.reason);
+      const indent = "         "; // aligns with severity label
 
-    for (const [file, violations] of byFile) {
-      if (opts.isTTY) lines.push(pc.bold(pc.underline(file)));
-      else lines.push(file);
-
-      for (const v of violations) {
-        const prefix = `  ${v.line}:${v.column}`;
-        const reason = v.reason;
-
-        if (opts.isTTY) {
-          const colored = severityColor(v.severity);
-          lines.push(`  ${pc.dim(`${v.line}:${v.column}`)}  ${pc.dim(v.rule)}  ${colored(reason)}`);
-        } else {
-          lines.push(`  ${v.line}:${v.column}  ${v.rule}  ${reason}`);
-        }
+      if (opts.isTTY) {
+        const sevColor = severityColor(v.severity);
+        lines.push(`  ${pc.bold(sevColor(sevLabel))}  ${pc.dim(v.rule)}`);
+        lines.push(`  ${pc.dim(location)}`);
+        lines.push(`  ${sevColor(reason)}`);
+      } else {
+        lines.push(`  ${sevLabel}  ${v.rule}`);
+        lines.push(`  ${indent}${location}`);
+        lines.push(`  ${indent}${reason}`);
       }
-      lines.push(""); // blank line between file groups
+      lines.push(""); // blank line between violations
     }
 
-    // Remove trailing blank line if we added one
-    if (byFile.size > 0) {
+    // Remove trailing blank line
+    if (report.violations.length > 0) {
       lines.pop();
     }
   }
