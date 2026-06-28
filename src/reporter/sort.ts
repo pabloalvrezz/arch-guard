@@ -11,7 +11,8 @@ export function sortViolations(violations: Violation[]): Violation[] {
 }
 
 function compareViolations(a: Violation, b: Violation): number {
-  const fileCmp = a.file.localeCompare(b.file);
+  // Use direct comparison for deterministic output across locales
+  const fileCmp = a.file < b.file ? -1 : a.file > b.file ? 1 : 0;
   if (fileCmp !== 0) return fileCmp;
 
   const lineCmp = a.line - b.line;
