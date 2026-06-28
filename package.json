@@ -1,0 +1,38 @@
+{
+  "name": "arch-guard",
+  "version": "0.1.0",
+  "description": "Statically enforce hexagonal and clean architecture boundaries in TS/JS codebases",
+  "type": "module",
+  "bin": {
+    "arch-guard": "./dist/cli.js"
+  },
+  "scripts": {
+    "build": "bun run scripts/build.ts",
+    "test": "bun test",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "commander": "^13.1.0",
+    "picocolors": "^1.1.1",
+    "picomatch": "^4.0.2"
+  },
+  "devDependencies": {
+    "@types/picomatch": "^4.0.1",
+    "bun-types": "^1.2.17",
+    "typescript": "^5.8.3"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "files": [
+    "dist"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "architecture",
+    "hexagonal",
+    "clean-architecture",
+    "linter",
+    "static-analysis"
+  ]
+}

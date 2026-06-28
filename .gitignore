@@ -1,0 +1,7 @@
+node_modules/
+dist/
+.archguard.yml
+.archguard.yaml
+.archguard.toml
+*.log
+.DS_Store
