@@ -34,7 +34,6 @@ export class RuleEngine {
 
     for (const rule of this.rules) {
       const ruleConfig = config.rules[rule.id];
-      const severity = ruleConfig?.severity ?? rule.defaultSeverity;
       const ignore = ruleConfig?.ignore ?? [];
 
       const violations = rule.check(ctx);

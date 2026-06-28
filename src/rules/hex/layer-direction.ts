@@ -65,17 +65,4 @@ export const hexLayerDirection: Rule = {
   },
 };
 
-/**
- * Find the layer of a resolved import path by checking the graph nodes.
- */
-function findLayerOfImport(
-  resolvedPath: string,
-  graph: { nodes: Array<{ filePath: string; layer: string | null }> }
-): string | null {
-  for (const node of graph.nodes) {
-    if (node.filePath === resolvedPath) {
-      return node.layer;
-    }
-  }
-  return null;
-}
+

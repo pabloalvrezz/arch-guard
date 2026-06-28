@@ -22,7 +22,7 @@ export interface GraphNode {
   imports: string[];
   /** Resolved absolute paths of imports (null = unresolvable) */
   resolvedImports: (string | null)[];
-  /** Line and column of each import (1-indexed line, 0-indexed column) */
+  /** Line and column of each import (1-indexed line, 1-indexed column) */
   importLocations: Array<{ line: number; column: number }>;
 }
 
